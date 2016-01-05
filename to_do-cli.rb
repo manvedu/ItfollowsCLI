@@ -47,6 +47,11 @@ class ItfollowsCLI < Thor
 
   desc "itfollows LOGIN", "Login into itfollows"
   def login
+    uri = URI.parse("#{host}/users/sign_in.json")
+    http = Net::HTTP.new(uri.host, uri.port)
+    response = http.get(uri.path, headers)
+    lines = JSON.parse(response.body)
+    puts lines.inspect
   end
     
   desc "",""
@@ -66,7 +71,13 @@ class ItfollowsCLI < Thor
   end
 
   desc "", ""
+    method_option :id, required: true
   def show(name)
+    uri = URI.parse("#{host}/#{name}/#{options[:id]}/edit.json")
+    http = Net::HTTP.new(uri.host, uri.port)
+    response = http.get(uri.path, headers)
+    lines = JSON.parse(response.body)
+    puts lines.inspect
   end
 end
 
