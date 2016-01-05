@@ -16,21 +16,21 @@ class ItfollowsCLI < Thor
       }
     end
     
+    def uri_for_show(name, id)
+      URI.parse("#{host}/#{name}/#{id}/edit.json")
+    end
     def uri(name)
       URI.parse("#{host}/#{name}.json")
     end
-    def build_http(name)
-      uri = uri(name)
+    def build_http(name, uri)
       Net::HTTP.new(uri.host, uri.port)
     end
-    def get(name)
-      uri = uri(name)
-      build_http(name).get(uri.path, headers)
+    def get(name, uri)
+      build_http(name, uri).get(uri.path, headers)
     end
   
-    def post(name, payload)
-      uri = uri(name)
-      build_http(name).post(uri.path, payload.to_json, headers)
+    def post(name, payload, uri)
+      build_http(name, uri).post(uri.path, payload.to_json, headers)
     end
   
     def host
@@ -56,7 +56,8 @@ class ItfollowsCLI < Thor
     
   desc "",""
   def list(name)
-    response = get(name)
+    uri = uri(name)
+    response = get(name, uri)
     lines = JSON.parse(response.body)
     puts lines.inspect
   end
@@ -65,7 +66,8 @@ class ItfollowsCLI < Thor
     method_option :dfn, required: true
   def new(name)
     payload = {'line_entry' => {"data" => {"dfn" => options[:dfn]}}}
-    response = post(name, payload)
+    uri = uri(name)
+    response = post(name, payload, uri)
     line = JSON.parse(response.body)
     puts "#{line["id"]} #{line["user_id"]} #{line["name"]}"
   end
@@ -73,9 +75,8 @@ class ItfollowsCLI < Thor
   desc "", ""
     method_option :id, required: true
   def show(name)
-    uri = URI.parse("#{host}/#{name}/#{options[:id]}/edit.json")
-    http = Net::HTTP.new(uri.host, uri.port)
-    response = http.get(uri.path, headers)
+    uri = uri_for_show(name, options[:id])
+    response = get(name, uri)
     lines = JSON.parse(response.body)
     puts lines.inspect
   end
