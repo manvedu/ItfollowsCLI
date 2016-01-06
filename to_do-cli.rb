@@ -46,12 +46,17 @@ class ItfollowsCLI < Thor
   end
 
   desc "itfollows LOGIN", "Login into itfollows"
+    method_option :email, required: true
+    method_option :password, required: true
   def login
+    headers1 = { 'Accept' => 'application/json', 'Content-Type' => 'application/json' }
     uri = URI.parse("#{host}/users/sign_in.json")
     http = Net::HTTP.new(uri.host, uri.port)
-    response = http.get(uri.path, headers)
+    payload = {"user" => {"email" => options[:email], "password" => options[:password]}} 
+    response = http.post(uri.path,payload.to_json, headers1)
     lines = JSON.parse(response.body)
-    puts lines.inspect
+    #lines.values[0]
+    puts lines
   end
     
   desc "",""
